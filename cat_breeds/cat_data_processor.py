@@ -14,14 +14,21 @@ load_dotenv()
 CAT_API_KEY = os.getenv("CAT_API_KEY")
 
 # Flag if the API is unavailable
-CAT_API_AVAILABLE = True
-
-if not CAT_API_KEY:
+if CAT_API_KEY:
+    CAT_API_AVAILABLE = True
+else:
     CAT_API_AVAILABLE = False
     warnings.warn(
         "CAT_API_KEY not found. Some functionality (like image downloading) may not work. "
         "Set the key in a `.env` file or via `os.environ['CAT_API_KEY'] = 'your_key_here'`"
     )
+
+if not CAT_API_KEY and "COLAB_GPU" in os.environ:
+    from getpass import getpass
+
+    CAT_API_KEY = getpass("Enter your CAT_API_KEY: ")
+    os.environ["CAT_API_KEY"] = CAT_API_KEY  # for downstream compatibility
+
 
 # Base URL for CatAPI
 BASE_URL = "https://api.thecatapi.com/v1/"

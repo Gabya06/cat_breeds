@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from PIL import Image
 import textwrap
+from typing import Optional
 
 
 class CatBreedQA:
@@ -9,9 +10,42 @@ class CatBreedQA:
         self.data = data
         self.client = client
 
-    def query(self, query: str, n_results: int = 3, filters: dict = None):
+    def query(
+        self,
+        query: str,
+        n_results: int = 3,
+        filters: dict = None,
+        query_embeddings: Optional[list] = None,
+    ):
+        """
+        Query ChromaDB database and obtain top n results
+
+        This functions can perfom:
+
+        Text-to-Image Search:
+            Find closest image vectors
+        Image-to-Image Search
+            Find similar cat images
+
+        Parameters:
+        ----------
+        query: str
+            Query, ie: "What is the most affectionate cat?"
+        n_results: int
+            Top n results to return
+        filters: dict
+            Dict with metadata to filter. ie: {'affection_level':'very affectionate'}
+        query_embeddings: Optional[List]
+            List of image or text embeddings to use when generating results
+        """
         self.query_text = query
-        self.results = self.db.query(query_texts=[query], n_results=n_results, where=filters)
+
+        if query_embeddings is not None:
+            self.results = self.db.query(
+                query_embeddings=[query_embeddings], n_results=n_results, where=filters
+            )
+        else:
+            self.results = self.db.query(query_texts=[query], n_results=n_results, where=filters)
         return self.results
 
     def display(self, filter_desc: str = ""):

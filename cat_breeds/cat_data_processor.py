@@ -7,13 +7,21 @@ import pandas as pd
 from PIL import Image
 import requests
 import time
+import warnings
 
 
 load_dotenv()
 CAT_API_KEY = os.getenv("CAT_API_KEY")
 
+# Flag if the API is unavailable
+CAT_API_AVAILABLE = True
+
 if not CAT_API_KEY:
-    raise ValueError("CAT_API_KEY not found. Please set it in your .env file.")
+    CAT_API_AVAILABLE = False
+    warnings.warn(
+        "CAT_API_KEY not found. Some functionality (like image downloading) may not work. "
+        "Set the key in a `.env` file or via `os.environ['CAT_API_KEY'] = 'your_key_here'`"
+    )
 
 # Base URL for CatAPI
 BASE_URL = "https://api.thecatapi.com/v1/"
@@ -26,8 +34,14 @@ class CatDataProcessor:
         """
         Get breed information from CatAPI
         """
-        headers = {"x-api-key": CAT_API_KEY}
-        response = requests.get(BASE_URL + "breeds", headers=headers)
+        if not CAT_API_AVAILABLE:
+            try:
+                response = requests.get(BASE_URL + "breeds")
+            except Exception as e:
+                raise (f"Cat API is not available. Please enter CAT_API_KEY\n{e}")
+        else:
+            headers = {"x-api-key": CAT_API_KEY}
+            response = requests.get(BASE_URL + "breeds", headers=headers)
 
         if response.status_code == 200:
             return response.json()  # Returns a list of breed dictionaries

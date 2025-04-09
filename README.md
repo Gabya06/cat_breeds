@@ -1,13 +1,67 @@
-🐾 Project Overview: Zero-Shot Cat Breed Classification with CLIP
+# 🐱 Cat Intelligence Project
+A multimodal RAG (Retrieval-Augmented Generation) system powered by Gemini and ChromaDB that lets you explore cat breeds via text and image queries. Ask questions like "Which fluffy cats come from Russia?" and visualize the results with breed predictions, embeddings, and more!
 
-This project explores the use of multimodal machine learning for classifying cat breeds in a zero-shot setting using CLIP (Contrastive Language–Image Pretraining). Instead of training a model on labeled cat breed images, we leverage CLIP's ability to align images and natural language descriptions in a shared embedding space.
+## 📦 Features
+### ✅ CAT API Data Retrieval
+Fetch breed metadata and images from TheCatAPI.
 
-We use Wikipedia text descriptions of cat breeds as the “reference knowledge” and compare them against cat images, either generated or retrieved, to determine the most likely breed—without any supervised training.
+### 🧠 RAG-style Q&A System
+Query breed data using ChromaDB with filters (origin, traits, etc.) and pass retrieved docs to a Gemini LLM for enriched answers.
 
-In addition, we explore retrieval-augmented generation (RAG) using ChromaDB to power natural language question-answering about cat breeds. This allows users to query breed-specific traits like “What does a Ragdoll cat look like?” and get a rich, grounded response, combining semantic retrieval with an LLM.
+### 🐾 Multimodal Search
+Match cat images to breed descriptions using CLIP and cosine similarity.
 
-This project showcases:
-* Zero-shot inference using CLIP on a custom cat breed dataset
-* The use of embeddings for visual and textual similarity
-* Integration of a vector database (ChromaDB) for RAG-style QA
-* Optional use of Gemini for image generation and LLM answers
+### 📊 Visualization
+Display cat breed results using matplotlib and seaborn.
+
+## 🚀 Installation (Colab or Local)
+Clone the repo:
+
+``` bash
+
+git clone https://github.com/gabya06/cat_breeds.git
+cd cat_project
+``` 
+
+Install as a package (in your virtual environment or Colab):
+
+``` bash
+pip install -e .
+``` 
+
+## 🧪 Usage
+``` py
+from cat_project.cat_breed_qa import query_breeds
+from cat_project.clip_predictor import predict_breed
+```
+
+* Ask a question:
+``` py
+query_breeds("Which cats have short legs and are affectionate?")
+```
+
+* Predict breed from an image:
+``` py
+predict_breed("cat_images/munchkin.jpg")
+```
+
+## 🛠 Dependencies
+Key libraries:
+
+* chromadb
+* openai, google-genai
+* transformers, torch
+* matplotlib, seaborn
+* Pillow, requests
+
+## 💡 Inspiration
+Combines RAG, Gemini embeddings, ChromaDB filtering, and CLIP for an exploratory and educational multimodal AI demo around cats.
+
+
+## 📸 Example Output
+Coming soon: screenshots of search results and prediction visualizations.
+
+
+🤝 Contributing
+Feel free to open issues or PRs. Cat lovers and AI nerds welcome 🐾
+

@@ -28,7 +28,7 @@ class ClipMatcher:
             inputs = processor(text=text_list, return_tensors="pt", padding=True, truncation=True)
             text_embeddings = clip_model.get_text_features(**inputs)
             text_embeddings = text_embeddings / text_embeddings.norm(dim=-1, keepdim=True)
-        return text_embeddings
+        return text_embeddings.cpu().squeeze().tolist()  # Already batched: List[List[float]]
 
     @staticmethod
     def preprocess_image(image_path: str) -> torch.Tensor:
@@ -47,7 +47,7 @@ class ClipMatcher:
                 inputs = processor(images=image, return_tensors="pt")
                 image_embeddings = clip_model.get_image_features(**inputs)
                 image_embeddings = image_embeddings / image_embeddings.norm(dim=-1, keepdim=True)
-                return image_embeddings.squeeze(0)  # Remove batch dimension
+                return image_embeddings.cpu().squeeze().tolist()  # batched: List[List[float]]
         except Exception as e:
             print(f"Error processing image {image_path}: {e}")
             return None

@@ -1,13 +1,9 @@
-from google import genai
 from google.genai import types
-
-# from io import BytesIO
-# from PIL import Image
 
 
 class CatImageGeenerator:
-    def __init__(self, api_key: str):
-        self.client = genai.Client(api_key=api_key)
+    def __init__(self, client):
+        self.client = client
 
     def generated_cat_images(self, prompt: str):
         """

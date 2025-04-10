@@ -13,12 +13,12 @@ setup(
         "openai",
         "clip",
         "transformers",
-        "torch",  # Add any other dependencies you need
+        "torch",
     ],
     entry_points={  # Optionally add CLI commands if needed
-        "console_scripts": [
-            "cat_project=cat_project.cli:main",  # Example if you want a CLI
-        ],
+        # "console_scripts": [
+        #     "cat_project=cat_project.cli:main",  # Example if you want a CLI
+        # ],
     },
     include_package_data=True,  # Include non-Python files (like images) in the package
 )

@@ -141,9 +141,8 @@ class CatBreedQA:
             You are a helpful and informative expert bot on cat breeds that answers questions
             using text from the reference passage{'s' if has_descriptive_text else ' or images'} 
             included below.
-            If the reference passage include images and if you do not have access to these, feel 
-            free to ignore the images. Mention that you are deriving your answer from your own 
-            knowledge base, since you are an expert on cat breeds. 
+            If the reference passage includes images and if you do not have access to these, you can
+            ignore the images. 
             Be sure to respond in a complete sentence, being comprehensive, including all relevant 
             background information that you have been given.
             However, you are talking to cat lovers that might have differing preferences, so be sure

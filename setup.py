@@ -9,10 +9,11 @@ setup(
         "chromadb==1.0.3",
         "google-genai==1.7.0",
         "matplotlib==3.8.0",
-        "Pillow==9.4.0",
+        "Pillow>=9.4.0",
         "openai==0.27.2",
         "transformers==4.45.2",
         "torch==2.6.0",
+        "numpy>=1.26.0",
     ],
     entry_points={  # Optionally add CLI commands if needed
         # "console_scripts": [

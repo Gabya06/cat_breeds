@@ -1,10 +1,7 @@
-from typing import List
 import chromadb
 
 
-def create_chromadb(
-    db_name: str, metadatas: List, embedding_function, delete_exisiting: bool = True
-):
+def create_chromadb(db_name: str, embedding_function, delete_exisiting: bool = True):
     """
     Create ChromaDB collection with given name and embedding function.
 
@@ -12,8 +9,6 @@ def create_chromadb(
     ----------
     db_name : str
         Name of the ChromaDB collection.
-    metadatas : List
-        Metadata associated with each document.
     embedding_function : EmbeddingFunction
         Function to generate embeddings.
     delete_exisiting: Bool
@@ -22,7 +17,6 @@ def create_chromadb(
 
     # create db and include metadata
     chroma_client = chromadb.Client()
-    # chroma_client = chromadb.Client(persist_directory="./my_chroma_db")
     # delete existing collection
     if delete_exisiting:
         try:

@@ -1,3 +1,32 @@
 [tool.black]
 line-length = 100
 target-version = ['py38', 'py39', 'py310']
+
+[project]
+name = "cat_project"
+version = "0.1.0"
+description = "A project for cat breed embeddings and LLM-powered Q&A"
+authors = [
+    { name="Gaby Agrocostea", email="gabya06@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+
+dependencies = [
+    "chromadb==1.0.3",
+    "google-genai==1.7.0",
+    "matplotlib==3.8.0",
+    "numpy==1.26.0",
+    "openai==0.27.2",
+    "pandas==2.1.1",
+    "Pillow==9.4.0",
+    "requests==2.31.0",
+    "torch==2.6.0",
+    "tqdm==4.65.0",
+    "transformers==4.45.2"
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"

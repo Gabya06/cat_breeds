@@ -21,15 +21,17 @@ def create_chromadb(
     """
 
     # create db and include metadata
-    chroma_client = chromadb.Client()
+    # chroma_client = chromadb.Client()
+    chroma_client = chromadb.Client(persist_directory="./my_chroma_db")
     # delete existing collection
     if delete_exisiting:
         try:
             chroma_client.delete_collection(name=db_name)
         except Exception:
             pass
-    db = chroma_client.create_collection(name=db_name, embedding_function=embedding_function)
-    # db = chroma_client.get_or_create_collection(name=db_name,
-    # embedding_function=embedding_function)
+    # db = chroma_client.create_collection(name=db_name, embedding_function=embedding_function)
+    db = chroma_client.get_or_create_collection(
+        name=db_name, embedding_function=embedding_function, metadatas=metadatas
+    )
 
     return db

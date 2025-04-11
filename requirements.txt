@@ -1,6 +1,6 @@
 chromadb==1.0.3
 google-genai==1.7.0
-matplotlib==3.8.0
+matplotlib>=3.8.0
 numpy>=1.26.0
 openai==0.27.2
 pandas==2.1.1

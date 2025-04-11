@@ -8,7 +8,7 @@ setup(
         "requests",
         "chromadb==1.0.3",
         "google-genai==1.7.0",
-        "matplotlib==3.8.0",
+        "matplotlib>=3.8.0",
         "Pillow>=9.4.0",
         "openai==0.27.2",
         "transformers==4.45.2",

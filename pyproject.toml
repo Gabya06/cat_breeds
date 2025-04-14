@@ -5,7 +5,7 @@ target-version = ['py38', 'py39', 'py310']
 [project]
 name = "cat_breeds"
 version = "0.1.0"
-description = "A project for cat breed embeddings and LLM-powered Q&A"
+description = "Cat breed identification and querying using GenAI and image embeddings"
 authors = [
     { name="Gaby Agrocostea", email="gabya06@gmail.com" }
 ]
@@ -14,12 +14,12 @@ requires-python = ">=3.9"
 license = "MIT"
 
 dependencies = [
-    "chromadb==1.0.3",
-    "google-genai==1.7.0",
+    "chromadb>=1.0.3,<2.0.0",
+    "google-genai>=1.7.0,<2.0.0",
     "matplotlib==3.8.0",
-    "numpy>=1.26.0,<3.0.0",
+    "numpy>=1.26.0,<2.0.0",
     "openai==0.27.2",
-    "pandas>=2.1.1,<2.3.0",
+    "pandas==2.2.3",
     "Pillow==9.4.0",
     "requests==2.31.0",
     "torch==2.6.0",

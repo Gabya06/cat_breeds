@@ -3,7 +3,7 @@ line-length = 100
 target-version = ['py38', 'py39', 'py310']
 
 [project]
-name = "cat_project"
+name = "cat_breeds"
 version = "0.1.0"
 description = "A project for cat breed embeddings and LLM-powered Q&A"
 authors = [
@@ -11,15 +11,15 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">=3.9"
-license = { text = "MIT" }
+license = "MIT"
 
 dependencies = [
     "chromadb==1.0.3",
     "google-genai==1.7.0",
     "matplotlib==3.8.0",
-    "numpy==1.26.0",
+    "numpy>=1.26.0,<3.0.0",
     "openai==0.27.2",
-    "pandas==2.1.1",
+    "pandas>=2.1.1,<2.3.0",
     "Pillow==9.4.0",
     "requests==2.31.0",
     "torch==2.6.0",
@@ -30,3 +30,8 @@ dependencies = [
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+
+# Tell setuptools to look in src/ for packages
+[tool.setuptools.packages.find]
+where = ["src"]

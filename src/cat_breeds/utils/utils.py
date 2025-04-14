@@ -1,4 +1,5 @@
 import chromadb
+from chromadb.config import Settings
 
 
 def create_chromadb(db_name: str, embedding_function, delete_exisiting: bool = True):
@@ -16,7 +17,9 @@ def create_chromadb(db_name: str, embedding_function, delete_exisiting: bool = T
     """
 
     # create db and include metadata
-    chroma_client = chromadb.Client()
+    settings = Settings(persist_directory="db/")
+    chroma_client = chromadb.Client(settings=settings)
+
     # delete existing collection
     if delete_exisiting:
         try:

@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 from google import genai
@@ -8,13 +9,37 @@ from chromadb import Documents, EmbeddingFunction, Embeddings
 
 
 # Load API Key
-load_dotenv()
-api_key = os.getenv("GEMINI_API_KEY")
-if not api_key:
-    raise ValueError("GEMINI_API_KEY not found. Please set it in your .env file.")
-client = genai.Client(api_key=api_key)
+# load_dotenv()
+# api_key = os.getenv("GEMINI_API_KEY")
+# if not api_key:
+#     raise ValueError("GEMINI_API_KEY not found. Please set it in your .env file.")
+# client = genai.Client(api_key=api_key)
 
 BATCH_SIZE = 100
+
+
+def get_gemini_api_key():
+    # Try loading from `.env` if running locally
+    if Path(".env").exists():
+        load_dotenv()
+
+    # Try environment variable (Colab, Kaggle)
+    api_key = os.getenv("GEMINI_API_KEY")
+
+    # Special case: Kaggle Secrets (Kaggle secrets tab must be manually added)
+    if not api_key and Path("/kaggle").exists():
+        kaggle_secrets_path = "/kaggle/working/secrets/gemini_api_key.txt"
+        if Path(kaggle_secrets_path).exists():
+            with open(kaggle_secrets_path) as f:
+                api_key = f.read().strip()
+
+    if not api_key:
+        raise ValueError(
+            "❌ GEMINI_API_KEY not found. Please set it in your `.env` file, "
+            "environment variables, or upload it as a Kaggle secret."
+        )
+
+    return api_key
 
 
 def is_retriable(e):
@@ -35,6 +60,9 @@ class EmbeddingModel(EmbeddingFunction):
         """
         Generates embeddings for given input documents or queries in batches.
         """
+        api_key = get_gemini_api_key()
+        client = genai.Client(api_key=api_key)
+
         task_type = "retrieval_document" if self.document_mode else "retrieval_query"
         embeddings = []
 

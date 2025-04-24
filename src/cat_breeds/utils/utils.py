@@ -1,8 +1,7 @@
-import chromadb
-from chromadb.config import Settings
+from chromadb import PersistentClient
 
 
-def create_chromadb(db_name: str, embedding_function, delete_exisiting: bool = True):
+def create_chromadb(db_name: str, embedding_function, delete_exisiting: bool = False):
     """
     Create ChromaDB collection with given name and embedding function.
 
@@ -17,8 +16,7 @@ def create_chromadb(db_name: str, embedding_function, delete_exisiting: bool = T
     """
 
     # create db and include metadata
-    settings = Settings(persist_directory="db/")
-    chroma_client = chromadb.Client(settings=settings)
+    chroma_client = PersistentClient(path="db/")  # Persist to disk
 
     # delete existing collection
     if delete_exisiting:

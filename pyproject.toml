@@ -24,7 +24,8 @@ dependencies = [
     "requests==2.31.0",
     "torch==2.6.0",
     "tqdm==4.65.0",
-    "transformers==4.45.2"
+    "transformers==4.45.2",
+    "watchdog>=4.0.0",
 ]
 
 [build-system]

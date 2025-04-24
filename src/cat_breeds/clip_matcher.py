@@ -2,7 +2,7 @@ from PIL import Image
 import torch
 import torch.nn.functional as F
 from typing import List, Optional, Union
-from transformers import CLIPModel, CLIPProcessor
+from transformers import CLIPModel, CLIPProcessor, BatchEncoding
 
 
 model_name = "openai/clip-vit-base-patch32"
@@ -23,7 +23,7 @@ class ClipMatcher:
 
         Returns:
         ---------
-        torch.Tensor: Preprocessed text embeddings.
+        torch.Tensor: Normalized text embeddings (n_texts, hidden_dim).
         """
         with torch.no_grad():
             inputs = processor(
@@ -47,8 +47,8 @@ class ClipMatcher:
         try:
             image = Image.open(image_path).convert("RGB")
             with torch.no_grad():
-                inputs = processor(images=image, return_tensors="pt").to(DEVICE)
-                image_embeddings = clip_model.get_image_features(**inputs)
+                inputs = processor(images=image, return_tensors="pt").to(DEVICE)  # type: ignore
+                image_embeddings = clip_model.get_image_features(**inputs)  # type: ignore
                 image_embeddings = image_embeddings / image_embeddings.norm(dim=-1, keepdim=True)
                 return image_embeddings.cpu().squeeze().tolist()  # batched: List[List[float]]
         except Exception as e:
@@ -57,27 +57,47 @@ class ClipMatcher:
 
     @staticmethod
     def predict_breed(
-        image_embedding: torch.Tensor, text_embeddings: torch.Tensor, breed_names: List
-    ) -> torch.Tensor:
+        image_embedding: torch.Tensor,
+        text_embeddings: torch.Tensor,
+        breed_names: List[str],
+        topk: int = 1,
+        return_similarity: bool = False,
+    ) -> List:
         """
         Predict the breed of a cat based on its image embedding and text embeddings.
 
         Parameters:
         -----------
-        image_embedding (torch.Tensor): Preprocessed image embedding.
-        text_embeddings (torch.Tensor): Preprocessed text embeddings.
-        breed_names (List): List of breed names.
-
+        image_embedding: torch.Tensor
+            Preprocessed image embedding.
+        text_embeddings: torch.Tensor
+            Preprocessed text embeddings.
+        breed_names: List
+            List of breed names.
+        topk: int
+            Number of results to return (top similar breeds). Default is 1.
         Returns:
         --------
-        str: Predicted breed name.
+        predicted_breed: List
+            k [predicted_breed, confidence] if return_similarity = True.
+            k [predicted_breed] if return_similarity = False
         """
         if image_embedding is None:
             print("Error: Image embedding is None.")
             return None
+
+        predicted_breeds = []
         # calculate similarity between image and text embeddings
         similarity = F.cosine_similarity(image_embedding, text_embeddings)
         # find most similar item
-        predicted_index = torch.argmax(similarity).item()
-        predicted_breed = breed_names[predicted_index]
-        return predicted_breed
+        top_results = similarity.topk(k=topk)
+        predicted_ix = top_results.indices
+        confidence = top_results.values.tolist()
+
+        for ix in predicted_ix:
+            predicted_breeds.append(breed_names[ix])
+
+        if return_similarity:
+            return list(zip(predicted_breeds, confidence))
+        else:
+            return predicted_breeds

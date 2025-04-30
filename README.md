@@ -1,6 +1,28 @@
 # 🐱 Cat Intelligence Project
 A multimodal RAG (Retrieval-Augmented Generation) system powered by Gemini and ChromaDB that lets you explore cat breeds via text and image queries. Ask questions like "Which fluffy cats come from Russia?" and visualize the results with breed predictions, embeddings, and more!
 
+## 🗂 Project Structure
+``` md
+cat_breeds/ 
+└── src/ 
+    ├── app.py # Streamlit entry point 
+    ├── app/ # UI helpers and logic 
+        └── ui_helpers.py 
+        └── logic.py 
+    ├── cat_breeds/ # Core modules (CLIP, ChromaDB, RAG) 
+        └── cat_breed_qa.py 
+        └── cat_data_processor.py 
+        └── clip_matcher.py 
+        └── create_chroma_embeddings.py
+        └── infer_breeds.py
+        ├── utils/ # Additional functionality
+            └── embedding_functions.py # Embedding creation functions
+            └── utils.py 
+└── db/ # ChromaDB SQLite storage
+└── notebooks/ # Jupyter demo notebooks
+└── images/ # Images
+```
+
 ## 📦 Features
 ### ✅ CAT API Data Retrieval
 Fetch breed metadata and images from TheCatAPI.
@@ -20,7 +42,8 @@ Clone the repo:
 ``` bash
 
 git clone https://github.com/gabya06/cat_breeds.git
-cd cat_project
+cd cat_breeds
+pip install -e .
 ``` 
 
 Install as a package (in your virtual environment or Colab):
@@ -29,10 +52,19 @@ Install as a package (in your virtual environment or Colab):
 pip install -e .
 ``` 
 
+## 🐾 Run the Streamlit App
+
+Start the interactive UI for breed prediction and Q&A:
+
+```bash
+cd src
+streamlit run app.py
+```
+
 ## 🧪 Usage
 ``` py
-from cat_project.cat_breed_qa import query_breeds
-from cat_project.clip_predictor import predict_breed
+from cat_breeds.cat_breed_qa import CatBreedQA
+from cat_breeds.clip_predictor import predict_breed
 ```
 
 * Ask a question:

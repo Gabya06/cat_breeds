@@ -18,7 +18,6 @@ class CatImageGeenerator:
         -------
         image data
 
-
         """
 
         try:

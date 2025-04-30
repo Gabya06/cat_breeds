@@ -5,7 +5,7 @@ import torch
 from cat_breeds.clip_matcher import ClipMatcher
 
 # Set project root
-PROJECT_ROOT = Path(__file__).resolve().parents[2]  # goes from app.py → app → src → root
+PROJECT_ROOT = Path(__file__).resolve().parents[2]  # [2]  # goes from app.py → app → src → root
 DB_PATH = PROJECT_ROOT / "db"
 
 # Load collection from disk
@@ -53,13 +53,23 @@ def predict_breed_clip(image_path: str, topk: int = 1, return_similarity: bool =
     return predicted_breed
 
 
-def predict_breed_chroma(image_path: str, topk: int = 1, return_scores: bool = True):
+def predict_breed_chroma(image_path: str, topk: int = 1, return_similarity: bool = True):
+    """
+    ChromaDB distances - lower = better. Similarity is calculated by 1 - distance
+    because in chromaDB lower distances are better, but we want higher similarity.
+    So 1 - distance is a pseudo similarity to match intuition of CLIP
+    """
     # preprocess image
     image_embedding = ClipMatcher.preprocess_image(image_path=image_path)
     results = image_collection.query(
         query_embeddings=[image_embedding], n_results=topk
     )  # type: ignore
-    if return_scores:
-        return list(zip([i["breed"] for i in results["metadatas"][0]], results["distances"][0]))  # type: ignore
+    if return_similarity:
+        return list(
+            zip(
+                [i["breed"] for i in results["metadatas"][0]],  # type: ignore
+                [1 - i for i in results["distances"][0]],  # type: ignore
+            )
+        )
     else:
         return results["metadatas"][0][0]["breed"]  # type: ignore #, results["distances"][0][0]

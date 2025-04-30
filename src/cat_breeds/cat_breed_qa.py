@@ -1,7 +1,11 @@
+import textwrap
+import time
+from typing import Dict, Optional
+
+from google import genai
 import matplotlib.pyplot as plt
 from PIL import Image
-import textwrap
-from typing import Dict, Optional
+
 from cat_breeds.clip_matcher import ClipMatcher
 
 
@@ -116,50 +120,81 @@ class CatBreedQA:
 
     def build_prompt(self):
         """
-        Build prompt for LLM
+        Build a natural language prompt for the LLM using either retrieved text documents
+        or breed names from image-based similarity search.
         """
 
-        """
-        Build prompt for LLM. Handles both text and image-based contexts.
-        """
+        top_metadata = self.results["metadatas"][0][0]
         # Combine docs into a single context string
         docs = self.results["documents"][0]
-        has_descriptive_text = any(len(doc.strip().split()) > 3 for doc in docs)
+        has_text = any(len(doc.strip().split()) > 3 for doc in docs)
 
-        if has_descriptive_text:
-            # Text-based retrieval
+        # Text-based retrieval
+        if has_text:
             context = "\n\n".join(docs)
-            reference_intro = "Reference passage:"
+            reference_intro = "Reference text:"
+            modality_note = "using the reference text below"
         else:
             # Image-based retrieval with breed names only
             breed_names = [self.data.iloc[int(idx)].breed for idx in self.results["ids"][0]]
             context = "\n".join([f"Image: {name}" for name in breed_names])
-            reference_intro = "The Reference includes images"
+            reference_intro = "Reference images:"
+            modality_note = "based on the breed names extracted from similar images"
+
+        metadata_summary = "\n".join(
+            f"{key}: {value}"
+            for key, value in top_metadata.items()
+            if key in {"breed", "affection_level", "health_issues", "shedding_level", "origin"}
+        )
+
+        structured_instruction = textwrap.dedent(
+            f"""Here is a some structured information about the breed:
+            {metadata_summary}
+
+        Please summarize this in a friendly, natural tone that's easy for cat lovers to read.
+        Write 2–3 sentences that include any personality traits, health notes, shedding tendencies,
+        or origins mentioned above and format it as structured bullets.
+        
+        Add a personal, friendly tone to this summary to help a curious pet owner understand
+        this breed.
+        """
+        )
 
         prompt = textwrap.dedent(
             f"""
-            You are a helpful and informative expert bot on cat breeds that answers questions
-            using text from the reference passage{'s' if has_descriptive_text else ' or images'}
-             included below.
-            If the reference passage includes images and if you do not have access to these, you can
-            ignore the images.
-            Be sure to respond in a complete sentence, being comprehensive, including all relevant
-             background information that you have been given.
-            However, you are talking to cat lovers that might have differing preferences, so be sure
-            to break down concepts and strike a friendly and conversational tone.
-            While distinguishing different cat breeds by coat, body type and location of origin can
-             be difficult, if the information is not relevant you may ignore it.
-
+            You are a helpful and knowledgeable assistant who specializes in cat breeds.
+            Answer the user's question {modality_note}.
+            Be complete, friendly, and informative—aimed at curious cat lovers.
+            
+            If relevant, include traits like coat type, origin, personality, and size.
+            Clarify subtle differences between breeds when possible, and explain in everyday terms.
+            
             {reference_intro}
             {context}
 
             Question: {self.query_text}
+
+            {structured_instruction}
             """
-        )
+        ).strip()
 
         return prompt
 
-    def get_answer(self):
+    def get_answer(self, model="gemini-2.0-flash", fallback_models=None, retries=3, backoff=2):
         prompt = self.build_prompt()
-        response = self.client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
-        return response.text
+        models_to_try = [model] + (fallback_models or [])
+        for m in models_to_try:
+            for i in range(retries):
+                try:
+                    response = self.client.models.generate_content(model=m, contents=prompt)
+                    return response.text
+                except genai.errors.ServerError as e:
+                    if "model is overloaded" in str(e) and i < retries - 1:
+                        wait = backoff**i
+                        print(f"[Gemini] {m} overloaded. Retrying in {wait} seconds...")
+                        time.sleep(wait)
+                    else:
+                        print(f"[Gemini] Failed with model {m} with Error {e}")
+                        break  # try next model
+
+        # raise RuntimeError("All model attempts failed ....")

@@ -1,8 +1,8 @@
 from PIL import Image
 import torch
 import torch.nn.functional as F
-from typing import List, Optional, Union
-from transformers import CLIPModel, CLIPProcessor, BatchEncoding
+from typing import List, Optional
+from transformers import CLIPModel, CLIPProcessor
 
 
 model_name = "openai/clip-vit-base-patch32"

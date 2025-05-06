@@ -2,7 +2,7 @@ from pathlib import Path
 from chromadb import PersistentClient
 import torch
 
-from cat_breeds.clip_matcher import ClipMatcher
+from cat_breeds.clip import ClipMatcher
 
 # Set project root
 PROJECT_ROOT = Path(__file__).resolve().parents[2]  # [2]  # goes from app.py → app → src → root
@@ -12,7 +12,8 @@ DB_PATH = PROJECT_ROOT / "db"
 chroma_client = PersistentClient(path=str(DB_PATH))
 text_collection = chroma_client.get_collection(name="cat_breed_texts")
 image_collection = chroma_client.get_collection(name="cat_breed_images")
-breeds = [i["breed"] for i in text_collection.get(include=["metadatas"])["metadatas"]]  # type: ignore
+metadatas = text_collection.get(include=["metadatas"])["metadatas"]
+breeds = [i.get("breed") for i in metadatas]  # type: ignore
 
 
 def predict_breed_clip(image_path: str, topk: int = 1, return_similarity: bool = True):
@@ -38,7 +39,10 @@ def predict_breed_clip(image_path: str, topk: int = 1, return_similarity: bool =
         If return_similarity = True: return [predicted_breeds]
     """
     image_embedding = ClipMatcher.preprocess_image(image_path=image_path)
-    image_tensor = torch.tensor(image_embedding)
+    if not isinstance(image_embedding, torch.Tensor):
+        image_tensor = torch.tensor(image_embedding)
+    else:
+        image_tensor = image_embedding.clone().detach()
     text_tensor = torch.tensor(
         text_collection.get(include=["embeddings", "metadatas"])["embeddings"]
     )
@@ -46,7 +50,7 @@ def predict_breed_clip(image_path: str, topk: int = 1, return_similarity: bool =
     predicted_breed = ClipMatcher.predict_breed(
         image_embedding=image_tensor,
         text_embeddings=text_tensor,
-        breed_names=breeds,
+        breed_names=breeds,  # type: ignore
         topk=topk,
         return_similarity=return_similarity,
     )
@@ -61,8 +65,12 @@ def predict_breed_chroma(image_path: str, topk: int = 1, return_similarity: bool
     """
     # preprocess image
     image_embedding = ClipMatcher.preprocess_image(image_path=image_path)
+    # update to list of it's a tensor
+    if isinstance(image_embedding, torch.Tensor):
+        image_embedding = image_embedding.tolist()
+
     results = image_collection.query(
-        query_embeddings=[image_embedding], n_results=topk
+        query_embeddings=[image_embedding], n_results=topk  # type: ignore
     )  # type: ignore
     if return_similarity:
         return list(
@@ -72,4 +80,4 @@ def predict_breed_chroma(image_path: str, topk: int = 1, return_similarity: bool
             )
         )
     else:
-        return results["metadatas"][0][0]["breed"]  # type: ignore #, results["distances"][0][0]
+        return results["metadatas"][0][0]["breed"]  # type: ignore

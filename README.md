@@ -10,17 +10,19 @@ cat_breeds/
         └── ui_helpers.py 
         └── logic.py 
     ├── cat_breeds/ # Core modules (CLIP, ChromaDB, RAG) 
-        └── cat_breed_qa.py 
-        └── cat_data_processor.py 
-        └── clip_matcher.py 
-        └── create_chroma_embeddings.py
-        └── infer_breeds.py
+        └── qa.py 
+        └── data_processing.py 
+        └── clip.py 
+        └── embed.py
+        └── infer.py
         ├── utils/ # Additional functionality
             └── embedding_functions.py # Embedding creation functions
             └── utils.py 
 └── db/ # ChromaDB SQLite storage
 └── notebooks/ # Jupyter demo notebooks
 └── images/ # Images
+└── Dockerfile
+└── pyproject.toml
 ```
 
 ## 📦 Features
@@ -63,8 +65,8 @@ streamlit run app.py
 
 ## 🧪 Usage
 ``` py
-from cat_breeds.cat_breed_qa import CatBreedQA
-from cat_breeds.clip_predictor import predict_breed
+from cat_breeds.qa import CatBreedQA
+from cat_breeds.infer import predict_breed_clip
 ```
 
 * Ask a question:
@@ -74,7 +76,7 @@ query_breeds("Which cats have short legs and are affectionate?")
 
 * Predict breed from an image:
 ``` py
-predict_breed("cat_images/munchkin.jpg")
+breed, score = predict_clip_breed(image_path = "cat_images/munchkin.jpg", topk=1, return_similarity=True)
 ```
 
 ## 🛠 Dependencies
@@ -90,10 +92,11 @@ Key libraries:
 Combines RAG, Gemini embeddings, ChromaDB filtering, and CLIP for an exploratory and educational multimodal AI demo around cats.
 
 
-## 📸 Example Output
-Coming soon: screenshots of search results and prediction visualizations.
+## 📸 Google Cloud
+The app is now viewable on Google Cloud:
+[🐱 Link to App](https://cat-breeds-app-624036724229.us-east1.run.app/)
 
 
-🤝 Contributing
+### 🤝 Contributing
 Feel free to open issues or PRs. Cat lovers and AI nerds welcome 🐾
 

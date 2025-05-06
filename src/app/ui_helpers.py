@@ -12,7 +12,7 @@ from cat_breeds.utils.embedding_functions import (
     ClipTextEmbeddingFunction,
     ClipImageEmbeddingFunction,
 )
-from cat_breeds.cat_breed_qa import CatBreedQA
+from cat_breeds.qa import CatBreedQA
 from cat_breeds.cat_image_generator import CatImageGeenerator
 
 
@@ -45,6 +45,14 @@ def load_collections():
         name="cat_breed_images", embedding_function=ClipImageEmbeddingFunction()
     )
     return text_collection, image_collection
+
+
+@st.cache_resource
+def load_breeds():
+    text_collection, _ = load_collections()
+    metadatas = text_collection.get(include=["metadatas"])["metadatas"]
+    breeds = [i.get("breed") for i in metadatas]  # type: ignore
+    return breeds
 
 
 # --- Set up CatBreedQA object ---

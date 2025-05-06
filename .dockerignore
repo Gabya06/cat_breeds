@@ -1,0 +1,70 @@
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter/IPython
+.ipynb_checkpoints
+
+# Large or irrelevant folders
+data/*
+!data/cat_data.csv   # allow only this CSV
+images/
+
+# Allow db folder
+!db/
+
+# Logs, outputs, experiments
+logs/
+checkpoints/
+models/
+notebooks/
+outputs/
+wandb/
+
+# Package-related
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Git and metadata
+.git/
+.gitignore
+.DS_Store
+.vscode/
+.idea/
+Thumbs.db
+
+# Misc
+*.log
+*.sqlite3
+*.h5
+*.pt
+*.onnx
+*.pickle
+*.parquet
+
+# Node and frontend
+node_modules/
+*.js.map
+
+*.zip
+*.tar
+*.tar.gz
+*.whl
+*.egg-info/
+
+# you got a warning earlier that it wasn't found
+README.md  
+tests/
+test/
+
+

@@ -6,11 +6,11 @@ import tempfile
 import streamlit as st
 
 from app.logic import aggregate_predictions
-from app.ui_helpers import get_cat_qa, get_cat_image_generator
-from cat_breeds.infer_breed import predict_breed_chroma, predict_breed_clip
-from cat_breeds.utils.image_utils import load_and_resize_image
+from app.ui_helpers import get_cat_qa, get_cat_image_generator, load_breeds
+from cat_breeds.infer import predict_breed_chroma, predict_breed_clip
 
-# APP
+
+# ---------- APP -----------
 
 # Configuration and Intro
 st.set_page_config(page_title="Cat Breed Predictor", layout="wide")
@@ -107,12 +107,14 @@ with tab1:
                     clip_preds = predict_breed_clip(
                         tmp_file.name, topk=top_n_preds, return_similarity=True
                     )
+
                     clip_pred_list.append(clip_preds)
 
                 if "ChromaDB" in selected_models:
                     chroma_preds = predict_breed_chroma(
                         tmp_file.name, topk=top_n_preds, return_similarity=True
                     )
+
                     chroma_pred_list.append(chroma_preds)
 
             # aggregate predictions
@@ -124,6 +126,7 @@ with tab1:
 
             # Display final top predictions
             st.markdown("## 🏆 Top Overall Prediction")
+
             for i, (breed, score) in enumerate(display_preds):
                 st.markdown(f"#### {breed} — Rank: {i+1} - Score: `{score:.3f}`")
 
@@ -166,12 +169,19 @@ with tab1:
 # Ask Cat Breed Questions
 with tab2:
     st.markdown(" ### ✨ Choose a Breed to Explore")
+    st.session_state.all_breeds = breeds = load_breeds()
+
     if "top_breeds" in st.session_state:
         # st.subheader("✨ Choose a Breed to Explore")
-        selected_breed = st.radio("Select a breed", st.session_state.top_breeds)
+        breed_options = st.session_state.top_breeds + ["Other breed"]
+        selected_breed = st.radio("Select a breed", breed_options)
 
-        default_question = f"Tell me something fun about the {selected_breed} cat breed."
-        # st.markdown(f"Default question: _{default_question}_")
+        if selected_breed == "Other breed":
+            breed_to_use = st.selectbox("Select a cat breed", options=breeds)
+
+        else:
+            breed_to_use = selected_breed
+        default_question = f"Tell me something fun about the {breed_to_use} cat breed."
         user_question = st.text_input("Ask a question about this breed:", value=default_question)
 
         with st.spinner("Querying Gemini ..."):
@@ -180,12 +190,15 @@ with tab2:
             else:
                 top_preds = 2
             catQa = get_cat_qa()
-            catQa.query(
+            results = catQa.query(
                 query=default_question,
                 mode="text",
                 n_results=top_preds,
-                filters={"breed": selected_breed},
+                filters={"breed": breed_to_use},
             )
+
+            if len(results["ids"][0]) == 0:
+                st.markdown(f"No results found for {breed_to_use}. Try a different breed")
             try:
                 answer = catQa.get_answer(model=selected_gemini_model)
                 st.success("Answer:")

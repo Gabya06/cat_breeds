@@ -5,8 +5,9 @@ from typing import Dict, Optional
 from google import genai
 import matplotlib.pyplot as plt
 from PIL import Image
+import torch
 
-from cat_breeds.clip_matcher import ClipMatcher
+from cat_breeds.clip import ClipMatcher
 
 
 class CatBreedQA:
@@ -58,9 +59,13 @@ class CatBreedQA:
             results = self.text_db.query(query_texts=[query], n_results=n_results, where=filters)
         elif mode == "image" and image_path:
             query_embed = ClipMatcher.preprocess_image(image_path=image_path)
+            if isinstance(query_embed, torch.Tensor):
+                query_embed = query_embed.tolist()
             results = self.image_db.query(query_embeddings=[query_embed], n_results=n_results)
         elif mode == "text_to_image":
             query_embed = ClipMatcher.preprocess_text([query])
+            if isinstance(query_embed, torch.Tensor):
+                query_embed = query_embed.tolist()
             results = self.image_db.query(query_embeddings=[query_embed], n_results=n_results)
         else:
             raise ValueError("Invalid mode or missing image_path for image query")
@@ -154,7 +159,7 @@ class CatBreedQA:
         Please summarize this in a friendly, natural tone that's easy for cat lovers to read.
         Write 2–3 sentences that include any personality traits, health notes, shedding tendencies,
         or origins mentioned above and format it as structured bullets.
-        
+
         Add a personal, friendly tone to this summary to help a curious pet owner understand
         this breed.
         """
@@ -165,10 +170,10 @@ class CatBreedQA:
             You are a helpful and knowledgeable assistant who specializes in cat breeds.
             Answer the user's question {modality_note}.
             Be complete, friendly, and informative—aimed at curious cat lovers.
-            
+
             If relevant, include traits like coat type, origin, personality, and size.
             Clarify subtle differences between breeds when possible, and explain in everyday terms.
-            
+
             {reference_intro}
             {context}
 

@@ -25,7 +25,10 @@ client = genai.Client(api_key=api_key)
 
 
 def create_embeddings():
-    data = pd.read_csv("/Users/gabyagrocostea/dev/cat_breeds/data/cat_data.csv")
+    data_path = "../data/cat_data.csv"
+    # data_path = Path(__file__).resolve().parents[2] / "data" / "cat_data.csv"
+    data = pd.read_csv(data_path, index_col=0)
+    # data = pd.read_csv("/Users/gabyagrocostea/dev/cat_breeds/data/cat_data.csv")
 
     # Generate CLIP embeddings for images and breed descriptions
     embedding_documents = []

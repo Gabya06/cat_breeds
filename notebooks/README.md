@@ -40,10 +40,13 @@ Rather than training a model on labeled cat breed images, we leverage CLIP's abi
 
 | File | Purpose |
 |------|---------|
-| `cat_data_preprocessor.py` | Fetch + format breed data from CAT API |
-| `cat_breed_qa.py` | Embed + query breed metadata via ChromaDB |
-| `clip_predictor.py` | Perform image-text similarity using CLIP |
-| `gemini.py` | Embed text or call Gemini LLM for generation |
+| `data_processing.py` | Fetch + format breed data from CAT API |
+| `qa.py` | Embed + query breed metadata via ChromaDB |
+| `clip.py` | Perform image-text similarity using CLIP |
+| `embed.py` | Embed text and images using CLIP |
+| `inference.py` | Predict cat breeds using CLIP & ChromaDB |
+| `utils/embedding_functions.py` | Embedding functions for CLIP |
+| `utils/utils.py` | ChromaDB functionality |
 
 ---
 

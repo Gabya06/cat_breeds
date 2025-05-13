@@ -67,19 +67,64 @@ streamlit run app.py
 
 ## 🧪 Usage
 ``` py
+import pandas as pd
+import os
+
 from cat_breeds.qa import CatBreedQA
 from cat_breeds.infer import predict_breed_clip
+from cat_breeds.utils import load_embeddings
+
+# load Gemini API Key
+api_key = os.getenv("GEMINI_API_KEY")
+client = genai.Client(api_key=api_key)
+data = pd.read_csv("data/cat_breeds.cv", index_col=0)
 ```
 
-* Ask a question:
+### Load Embeddings & Set up CatQA
 ``` py
-query_breeds("Which cats have short legs and are affectionate?")
+text_collection, image_collection = load_embeddings()
+
+catQa = CatBreedQA(text_db=text_collection, image_db=image_collection, client=client, data=data)
 ```
 
-* Predict breed from an image:
+## Ask a Question!
 ``` py
-breed, score = predict_clip_breed(image_path = "cat_images/munchkin.jpg", topk=1, return_similarity=True)
+question = "Which cats have short legs and are affectionate?"
+text_example = catQa.query(query=question, mode="text", n_results=1)
+text_results = catQa.get_answer()
 ```
+
+### Results:
+``` html
+ Okay, I'd be happy to tell you about cats with short legs and affectionate personalities!
+
+Based on the information I have, the **Munchkin** cat breed fits that description. Here's a bit more about them:
+
+*   Munchkins are known to be **very affectionate** and have a playful, intelligent personality.
+*   Originating in the United States, they're also known to **shed an average amount**.
+*   It's worth noting that Munchkins **have some health issues**, so it's something to keep in mind.
+
+```
+
+### Visualize Results:
+``` py
+catQA.display()
+```
+
+![Short Legged Munchkin](/images/Munchkin/Munchkin_result.jpg)
+
+## Predict Breed from an Image:
+``` py
+# Replace with your image path
+breed = predict_clip_breed(image_path = "images/my_pets/bellini_1.png", topk=1, 
+                                    return_similarity=False)
+print(f"Your Predicted Cat Breed is: {breed}")
+```
+
+### Results:
+Your Predicted Cat Breed is: **Persian**
+
+----------------------------
 
 ## 🛠 Dependencies
 Key libraries:

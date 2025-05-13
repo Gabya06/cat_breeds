@@ -4,25 +4,27 @@ A multimodal RAG (Retrieval-Augmented Generation) system powered by Gemini and C
 ## 🗂 Project Structure
 ``` md
 cat_breeds/ 
+└── notebooks/                          -- Jupyter demo notebooks
 └── src/ 
-    ├── app.py # Streamlit entry point 
-    ├── app/ # UI helpers and logic 
+    ├── app.py                          -- Streamlit entry point 
+    ├── app/                            -- UI helpers and logic 
         └── ui_helpers.py 
         └── logic.py 
-    ├── cat_breeds/ # Core modules (CLIP, ChromaDB, RAG) 
-        └── qa.py 
-        └── data_processing.py 
-        └── clip.py 
-        └── embed.py
-        └── infer.py
-        ├── utils/ # Additional functionality
-            └── embedding_functions.py # Embedding creation functions
-            └── utils.py 
-└── db/ # ChromaDB SQLite storage
-└── notebooks/ # Jupyter demo notebooks
-└── images/ # Images
-└── Dockerfile
-└── pyproject.toml
+    ├── cat_breeds/                     -- Python package (core logic) 
+        └── qa.py                       -- Search ChromaDB, return results, build prompt
+        └── data_processing.py          -- Preprocess cat API data 
+        └── clip.py                     -- Preprocess text & images with CLIP
+        └── embed.py                    -- One time run to create/update embeddings
+        └── infer.py                    -- Predict cat breeds using CLIP & Chroma
+        ├── utils/                      
+            └── embedding_functions.py  -- Create CLIP embedding functions for images & text
+            └── utils.py                -- Create Chroma.db
+└── db/                                 -- ChromaDB SQLite storage
+
+└── images/                             -- Images
+└── Dockerfile                          -- DockerFile
+└── .dockerignore                       -- Docker files to ignore
+└── pyproject.toml                      -- Project Dependencies
 ```
 
 ## 📦 Features

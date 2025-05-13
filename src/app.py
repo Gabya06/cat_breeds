@@ -1,16 +1,21 @@
+import altair as alt
 from google import genai
 from io import BytesIO
 import pandas as pd
+from pathlib import Path
 from PIL import Image
 import tempfile
 import streamlit as st
 
-from app.logic import aggregate_predictions
+from app.logic import aggregate_predictions, get_confidence_label
 from app.ui_helpers import get_cat_qa, get_cat_image_generator, load_breeds
 from cat_breeds.infer import predict_breed_chroma, predict_breed_clip
 
 
 # ---------- APP -----------
+
+# Path to your default image
+DEFAULT_IMAGE_PATH = Path(__file__).parent / "app" / "static" / "default_image.png"
 
 # Configuration and Intro
 st.set_page_config(page_title="Cat Breed Predictor", layout="wide")
@@ -22,10 +27,15 @@ st.markdown(
     """
 )
 
+if "uploaded" not in st.session_state:
+    st.session_state["uploaded"] = False
+if "uploaded_files" not in st.session_state:
+    st.session_state["uploaded_files"] = []
+
+
 # Sidebar
 with st.sidebar:
     st.header("⚙️ Settings")
-    # Session state defaults
 
     # Uploaded files
     if "uploaded" not in st.session_state:
@@ -78,11 +88,13 @@ with st.sidebar:
 
 
 # Create tabs
-tab1, tab2 = st.tabs(["📷 Image Breed Prediction", "❓ Q&A with Gemini"])
+tab1, tab2 = st.tabs(["Cat Breed Identification 📷", "Pet Information ℹ️"])
 # Get Cat Breed Predictions
 with tab1:
-    st.markdown("### 📸 Compare Breed Predictions from Image")
+    st.markdown("### 📸 Identify Your Cat Breed")
     clip_pred_list, chroma_pred_list = [], []
+
+    uploaded_files = st.session_state.get("uploaded_files", [])
 
     if st.session_state.uploaded:
         with st.spinner("Running Predictions ..."):
@@ -119,20 +131,58 @@ with tab1:
 
             # aggregate predictions
             final_preds = aggregate_predictions(clip_pred_list, chroma_pred_list)
+            # show only top n preeds
             display_preds = final_preds[:top_n_preds]
 
-            # store results in session
             st.session_state.top_breeds = [breed for breed, _ in display_preds]
 
             # Display final top predictions
             st.markdown("## 🏆 Top Overall Prediction")
-
             for i, (breed, score) in enumerate(display_preds):
-                st.markdown(f"#### {breed} — Rank: {i+1} - Score: `{score:.3f}`")
+                st.markdown(f"#### {breed} — Rank: {i+1} - Score: `{score:.2%}`")
 
             # Toggle for detailed view
             if st.toggle("🔍 Show Predictions by Model"):
+
+                # prepare data for display
+                display_df = pd.DataFrame(display_preds, columns=["Breed", "Score"])
+                display_df.Score = display_df.Score.astype(float)
+                display_df["Confidence Level"] = display_df["Score"].apply(get_confidence_label)
+
+                display_df["Score Display"] = (display_df["Score"] * 100).round().astype(
+                    int
+                ).astype(str) + "%"
+
+                bar = (
+                    alt.Chart(display_df)
+                    .mark_bar()
+                    .encode(
+                        x=alt.X(
+                            "Score:Q",
+                            title="Match Score",
+                            scale=alt.Scale(domain=[0, 1]),
+                            axis=alt.Axis(format=".0%", tickCount=4),
+                            # bins=[0, 0.15, 0.25, 0.35, 0.5, 1.0]),
+                        ),
+                        y=alt.Y("Breed:N", sort="-x", title="Predicted Breed"),
+                        color=alt.Color(
+                            "Confidence Level:N",
+                            scale=alt.Scale(
+                                domain=["High Match", "Moderate Match", "Close Match"],
+                                range=["#0080FE", "#ffbf00", "#ffa07a"],
+                            ),
+                            legend=alt.Legend(title="Match Level"),
+                        ),
+                        tooltip=["Breed", "Confidence Level", "Score Display"],
+                    )
+                    .properties(width=600, height=400, title="🔍 Most Likely Breed Matches")
+                )
+
                 st.subheader("📊 Model-Specific Scores")
+                st.text("")
+
+                st.altair_chart(bar, use_container_width=True)
+
                 col1, col2 = st.columns(2)
 
                 clip_df = pd.DataFrame()
@@ -165,6 +215,12 @@ with tab1:
                     st.dataframe(data=clip_df, hide_index=True, use_container_width=True)
                 with col2:
                     st.dataframe(data=chroma_df, hide_index=True, use_container_width=True)
+
+    else:
+        st.markdown("### Example Cat Image")
+        default_image = Image.open(DEFAULT_IMAGE_PATH)
+        st.image(default_image, caption="Try it with your own photo!", use_container_width=True)
+
 
 # Ask Cat Breed Questions
 with tab2:

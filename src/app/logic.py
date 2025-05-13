@@ -83,3 +83,13 @@ def aggregate_predictions(clip_preds, chroma_preds, model_weights=None):
     # Sort by total score
     sorted_breeds = sorted(breed_scores.items(), key=lambda x: x[1], reverse=True)
     return sorted_breeds
+
+
+# Confidence mapping
+def get_confidence_label(score):
+    if score >= 0.35:
+        return "High Match"
+    elif score >= 0.25:
+        return "Moderate Match"
+    else:
+        return "Close Match"
